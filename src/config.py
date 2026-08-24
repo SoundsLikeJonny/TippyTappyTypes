@@ -23,9 +23,9 @@ from src.quotes_data import BUILTIN_QUOTES
 
 
 def _user_data_dir() -> str:
-    """Return the per-user data directory: %APPDATA%\\TinyType on Windows."""
+    """Return the per-user data directory: %APPDATA%\\Tippy Tappy Types on Windows."""
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
-    return os.path.join(base, "TinyType")
+    return os.path.join(base, "Tippy Tappy Types")
 
 
 class Config:
@@ -36,7 +36,7 @@ class Config:
         Initialize configuration manager.
 
         Args:
-            config_path: Path to configuration file. Defaults to %APPDATA%\\TinyType\\config.json.
+            config_path: Path to configuration file. Defaults to %APPDATA%\\Tippy Tappy Types\\config.json.
         """
         if not config_path:
             config_path = os.path.join(_user_data_dir(), "config.json")

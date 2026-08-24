@@ -33,11 +33,11 @@ from src.updater import Updater
 from ui.splash import SplashScreen
 
 
-class TinyTypeApp(QObject):
+class Tippy Tappy TypesApp(QObject):
     """Main application controller."""
 
     def __init__(self) -> None:
-        """Initialize TinyType application."""
+        """Initialize Tippy Tappy Types application."""
         super().__init__()
         self.app: QApplication = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
@@ -231,7 +231,7 @@ class TinyTypeApp(QObject):
 def _relaunch_unelevated_if_needed() -> None:
     """If we're running elevated, relaunch unelevated via explorer.exe.
 
-    An elevated TinyType cannot receive keys injected by unelevated
+    An elevated Tippy Tappy Types cannot receive keys injected by unelevated
     remappers (PowerToys Keyboard Manager, AutoHotkey, etc.) due to UIPI.
     This is most common after an NSIS install where the installer runs
     elevated and launches the app from the Finish page.
@@ -244,7 +244,7 @@ def _relaunch_unelevated_if_needed() -> None:
         return
 
     exe_path = sys.executable
-    # PyInstaller one-dir build: sys.executable is TinyType.exe.
+    # PyInstaller one-dir build: sys.executable is Tippy Tappy Types.exe.
     # Dev mode: python.exe — do not relaunch (would recurse via venv python).
     if os.path.basename(exe_path).lower() == "python.exe":
         return
@@ -257,7 +257,7 @@ def _relaunch_unelevated_if_needed() -> None:
 def main() -> None:
     """Application entry point."""
     _relaunch_unelevated_if_needed()
-    app: TinyTypeApp = TinyTypeApp()
+    app: Tippy Tappy TypesApp = Tippy Tappy TypesApp()
     sys.exit(app.run())
 
 

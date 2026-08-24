@@ -1,4 +1,4 @@
-TinyType
+Tippy Tappy Types
 Jon Evans
 Copyright (c) Jon Evans 2026
 Tiny but powerful!

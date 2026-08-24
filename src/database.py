@@ -25,9 +25,9 @@ from datetime import datetime
 
 
 def _user_data_dir() -> str:
-    """Return the per-user data directory: %APPDATA%\\TinyType on Windows."""
+    """Return the per-user data directory: %APPDATA%\\Tippy Tappy Types on Windows."""
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
-    return os.path.join(base, "TinyType")
+    return os.path.join(base, "Tippy Tappy Types")
 
 
 class Database:

@@ -26,7 +26,7 @@ from src.auth import GoogleAuth
 
 
 class SettingsWindow(QMainWindow):
-    """Settings window for TinyType application."""
+    """Settings window for Tippy Tappy Types application."""
 
     start_typing_test: Signal = Signal()
     settings_changed: Signal = Signal()

@@ -1,7 +1,7 @@
-; TinyType NSIS Installer Script
+; Tippy Tappy Types NSIS Installer Script
 ; Passed in from build.py:
 ;   /DAPP_VERSION=x.y.z
-;   /DBUILD_DIR=path\to\builds\TinyType_timestamp\TinyType
+;   /DBUILD_DIR=path\to\builds\Tippy Tappy Types_timestamp\Tippy Tappy Types
 
 Unicode True
 
@@ -9,18 +9,18 @@ Unicode True
   !define APP_VERSION "0.1.0"
 !endif
 !ifndef BUILD_DIR
-  !define BUILD_DIR "dist\TinyType"
+  !define BUILD_DIR "dist\Tippy Tappy Types"
 !endif
 
-!define APP_NAME        "TinyType"
+!define APP_NAME        "Tippy Tappy Types"
 !define APP_PUBLISHER   "Jon Evans"
-!define APP_URL         "https://github.com/SoundsLikeJonny/TinyType"
-!define APP_EXE         "TinyType.exe"
-!define UNINSTALL_KEY   "Software\Microsoft\Windows\CurrentVersion\Uninstall\TinyType"
+!define APP_URL         "https://github.com/SoundsLikeJonny/Tippy Tappy Types"
+!define APP_EXE         "Tippy Tappy Types.exe"
+!define UNINSTALL_KEY   "Software\Microsoft\Windows\CurrentVersion\Uninstall\Tippy Tappy Types"
 !define STARTUP_KEY     "Software\Microsoft\Windows\CurrentVersion\Run"
 
 Name "${APP_NAME} ${APP_VERSION}"
-OutFile "builds\TinyType-Setup-${APP_VERSION}.exe"
+OutFile "builds\Tippy Tappy Types-Setup-${APP_VERSION}.exe"
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
 InstallDirRegKey HKLM "${UNINSTALL_KEY}" "InstallLocation"
 RequestExecutionLevel admin
@@ -43,9 +43,9 @@ ShowUninstDetails show
 !insertmacro MUI_LANGUAGE "English"
 
 ; ---------------------------------------------------------------
-; Launch TinyType unelevated after install.
+; Launch Tippy Tappy Types unelevated after install.
 ; The installer itself runs elevated (RequestExecutionLevel admin),
-; so a direct Run would make TinyType inherit elevation. An elevated
+; so a direct Run would make Tippy Tappy Types inherit elevation. An elevated
 ; process cannot receive PowerToys/AutoHotkey injected keys (UIPI),
 ; so we shell out through the unelevated explorer.exe instead.
 ; ---------------------------------------------------------------
@@ -107,6 +107,6 @@ Section "Uninstall"
   DeleteRegKey  HKLM "${UNINSTALL_KEY}"
   DeleteRegValue HKCU "${STARTUP_KEY}" "${APP_NAME}"
 
-  ; NOTE: user data in %APPDATA%\TinyType is intentionally left intact
+  ; NOTE: user data in %APPDATA%\Tippy Tappy Types is intentionally left intact
   ;       so the user's config and stats survive a reinstall.
 SectionEnd

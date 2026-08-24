@@ -572,7 +572,7 @@ class Ui_SettingsWindow(object):
     # setupUi
 
     def retranslateUi(self, SettingsWindow):
-        SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"TinyType Settings", None))
+        SettingsWindow.setWindowTitle(QCoreApplication.translate("SettingsWindow", u"Tippy Tappy Types Settings", None))
         self.groupBox_font.setTitle(QCoreApplication.translate("SettingsWindow", u"Font Settings", None))
         self.label_font.setText(QCoreApplication.translate("SettingsWindow", u"Font:", None))
         self.label_fontSize.setText(QCoreApplication.translate("SettingsWindow", u"Font Size:", None))

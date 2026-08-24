@@ -28,7 +28,7 @@ class GoogleAuth:
     
     def __init__(
         self,
-        oauth_server: str = "https://tinytype-oauth.YOUR-SUBDOMAIN.workers.dev",
+        oauth_server: str = "https://Tippy Tappy Types-oauth.YOUR-SUBDOMAIN.workers.dev",
         token_path: str = "data/token.json"
     ) -> None:
         """

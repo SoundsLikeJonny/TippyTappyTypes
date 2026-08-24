@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>TinyType Overlay</string>
+   <string>Tippy Tappy Types Overlay</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
@@ -74,7 +74,7 @@
         <bool>false</bool>
        </property>
        <property name="toolTip">
-        <string>A new version of TinyType is available!</string>
+        <string>A new version of Tippy Tappy Types is available!</string>
        </property>
        <property name="styleSheet">
         <string notr="true">background: transparent; padding: 1px;</string>

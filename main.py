@@ -15,7 +15,7 @@
 #      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-TinyType launcher script.
+Tippy Tappy Types launcher script.
 """
 if __name__ == "__main__":
     from src.main import main

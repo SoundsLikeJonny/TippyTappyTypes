@@ -332,7 +332,7 @@ class TypingOverlay(QWidget):
             )
             self.ui.label_version.setCursor(Qt.PointingHandCursor)
             self.ui.label_version.setToolTip(
-                f"Click to install TinyType {self._pending_update_version}"
+                f"Click to install Tippy Tappy Types {self._pending_update_version}"
             )
         else:
             text = (
@@ -873,7 +873,7 @@ class TypingOverlay(QWidget):
         # Always center the quit prompt, regardless of caret alignment mode.
         self.ui.label_text.setAlignment(Qt.AlignCenter)
         self.ui.label_text.setText(
-            f'<span style="color:{untyped_color};">Quit TinyType? </span>'
+            f'<span style="color:{untyped_color};">Quit Tippy Tappy Types? </span>'
             f'<span style="color:{secondary}; font-weight:bold;">[y]</span>'
             f'<span style="color:{untyped_color};"> yes  </span>'
             f'<span style="color:{secondary}; font-weight:bold;">[n]</span>'
@@ -1419,7 +1419,7 @@ class TypingOverlay(QWidget):
         """Render the apps-16 Octicon SVG into label_update and make it visible."""
         secondary = self.config.get("typed_color", "#8b047e")
         self._render_update_icon(secondary)
-        self.ui.label_update.setToolTip(f"TinyType {latest_version} is available — click to update")
+        self.ui.label_update.setToolTip(f"Tippy Tappy Types {latest_version} is available — click to update")
         self.ui.label_update.setVisible(True)
 
         # Make the version label clickable to update too (1.d)
@@ -1440,7 +1440,7 @@ class TypingOverlay(QWidget):
         reply = QMessageBox.question(
             self,
             "Update Available",
-            f"A new version of TinyType is available.\n\nDownload and install now?\n"
+            f"A new version of Tippy Tappy Types is available.\n\nDownload and install now?\n"
             f"The app will restart automatically.",
             QMessageBox.Yes | QMessageBox.No,
         )
