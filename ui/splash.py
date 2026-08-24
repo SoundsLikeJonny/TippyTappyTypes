@@ -1,5 +1,5 @@
-#      TinyType is a minimal typing test software that sits in the corner of your screen while you work!
-#      Copyright (C) 2026  Jon Evans
+#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
 #      it under the terms of the GNU General Public License as published by
@@ -46,7 +46,8 @@ class SplashScreen(QDialog, Ui_splash_screen):
         super().__init__(*args)
         self.setupUi(self)
         self.splash_screen = QSplashScreen()
-        self.splash_screen.setPixmap(QPixmap(Info.SPLASH_PATH))
+        pixmap = QPixmap(Info.SPLASH_PATH)
+        self.splash_screen.setPixmap(pixmap.scaledToWidth(200, Qt.SmoothTransformation))
         self.splash_screen.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.label_footer.setText(f'{Info.COPYRIGHT}\n'
                                   f'{Info.NOTICE}')
@@ -68,3 +69,4 @@ class SplashScreen(QDialog, Ui_splash_screen):
     def close(self) -> None:
         super().close()
         self.signal_splash_screen_closed.emit()
+# TODO: Make it so that the color op of the

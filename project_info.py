@@ -1,5 +1,5 @@
-#      TinyType is a minimal typing test software that sits in the corner of your screen while you work!
-#      Copyright (C) 2026  Jon Evans
+#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
 #      it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@ import dataclasses
 @dataclasses.dataclass
 class Info:
     NOTIFICATION_TIME: int = 50
-    PROJECT_TITLE: str = 'TinyType'
-    COMPANY: str = 'Jon Evans'
+    PROJECT_TITLE: str = 'Tippy Tappy Types'
+    COMPANY: str = 'Jon Evans. Art by Cafefaevans'
     COPYRIGHT: str = 'Copyright (c) Jon Evans 2026'
     NOTICE: str = 'Tiny but powerful!'
     RESOURCES_PATH: str = 'resources'
