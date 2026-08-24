@@ -20,7 +20,7 @@ import dataclasses
 @dataclasses.dataclass
 class Info:
     NOTIFICATION_TIME: int = 50
-    PROJECT_TITLE: str = 'Tippy Tappy Types'
+    PROJECT_TITLE: str = 'TippyTappyTypes'
     COMPANY: str = 'Jon Evans. Art by Cafefaevans'
     COPYRIGHT: str = 'Copyright (c) Jon Evans 2026'
     NOTICE: str = 'Tiny but powerful!'
@@ -29,7 +29,7 @@ class Info:
     SPLASH_PATH: str = f'{RESOURCES_PATH}/splash.png'
     DOCS_LINK: str = ''
     VERSION: str = '0.1.0-beta.23'
-    GITHUB_REPO: str = 'SoundsLikeJonny/Tippy Tappy Types'
+    GITHUB_REPO: str = 'SoundsLikeJonny/TippyTappyTypes'
 
 
 
