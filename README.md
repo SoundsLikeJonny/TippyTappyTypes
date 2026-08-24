@@ -1,11 +1,12 @@
 
-![GitHub Release](https://img.shields.io/github/v/release/soundslikejonny/TinyType?include_prereleases&display_name=release)
+![GitHub Release](https://img.shields.io/github/v/release/soundslikejonny/TippyTappyTypes?include_prereleases&display_name=release)
 
 
 
-# TinyType
+# Tippy Tappy Types
 
-<img width="265" height="80" alt="splash" src="https://github.com/user-attachments/assets/383f4da9-e73f-451b-a7c9-59a1ecea1864" />
+<img width="3840" height="2160" alt="IMG_1024" src="https://github.com/user-attachments/assets/410298d8-7b84-49cb-9a23-673cbe4da624" />
+
 
 This little typing test can stay open on the side or corner of your screen for a quick typing test while you're working on other things.
 
