@@ -1,7 +1,7 @@
 ; Tippy Tappy Types NSIS Installer Script
 ; Passed in from build.py:
 ;   /DAPP_VERSION=x.y.z
-;   /DBUILD_DIR=path\to\builds\Tippy Tappy Types_timestamp\Tippy Tappy Types
+;   /DBUILD_DIR=path\to\builds\TippyTappyTypes_timestamp\TippyTappyTypes
 
 Unicode True
 
