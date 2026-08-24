@@ -9,7 +9,7 @@ Unicode True
   !define APP_VERSION "0.1.0"
 !endif
 !ifndef BUILD_DIR
-  !define BUILD_DIR "dist\Tippy Tappy Types"
+  !define BUILD_DIR "dist\TippyTappyTypes"
 !endif
 
 !define APP_NAME        "Tippy Tappy Types"
@@ -20,7 +20,7 @@ Unicode True
 !define STARTUP_KEY     "Software\Microsoft\Windows\CurrentVersion\Run"
 
 Name "${APP_NAME} ${APP_VERSION}"
-OutFile "builds\Tippy Tappy Types-Setup-${APP_VERSION}.exe"
+OutFile "builds\TippyTappyTypes-Setup-${APP_VERSION}.exe"
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
 InstallDirRegKey HKLM "${UNINSTALL_KEY}" "InstallLocation"
 RequestExecutionLevel admin
