@@ -69,4 +69,3 @@ class SplashScreen(QDialog, Ui_splash_screen):
     def close(self) -> None:
         super().close()
         self.signal_splash_screen_closed.emit()
-# TODO: Make it so that the color op of the
