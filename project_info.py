@@ -1,4 +1,4 @@
-#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
+#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -20,7 +20,7 @@ import dataclasses
 @dataclasses.dataclass
 class Info:
     NOTIFICATION_TIME: int = 50
-    PROJECT_TITLE: str = 'TippyTappyTypes'
+    PROJECT_TITLE: str = 'Tippy Tappy Types'
     COMPANY: str = 'Jon Evans. Art by Cafefaevans'
     COPYRIGHT: str = 'Copyright (c) Jon Evans 2026'
     NOTICE: str = 'Tiny but powerful!'
@@ -29,7 +29,7 @@ class Info:
     SPLASH_PATH: str = f'{RESOURCES_PATH}/splash.png'
     DOCS_LINK: str = ''
     VERSION: str = '0.1.0-beta.23'
-    GITHUB_REPO: str = 'SoundsLikeJonny/TippyTappyTypes'
+    GITHUB_REPO: str = 'SoundsLikeJonny/Tippy Tappy Types'
 
 
 
