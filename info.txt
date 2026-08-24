@@ -1,6 +1,6 @@
 TippyTappyTypes
-Jon Evans
+Jon Evans. Art by Cafefaevans
 Copyright (c) Jon Evans 2026
 Tiny but powerful!
-Build Date: 20260807.181616
+Build Date: 20260824.004943
 Author: Jon Evans

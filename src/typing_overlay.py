@@ -22,7 +22,7 @@ from PySide6.QtCore import Qt, QTimer, Signal, QObject, QEvent
 from PySide6.QtGui import QFont, QKeyEvent, QPainter, QIcon, QWheelEvent, QKeySequence, QFontMetricsF, QPixmap, QColor
 
 from ui.generated.ui_typing_overlay import Ui_TypingOverlay
-from project_info import Info
+from project_info import Info, resource_path
 from src.typing_engine import TypingEngine
 from src.config import Config
 from src.database import Database
@@ -233,10 +233,7 @@ class TypingOverlay(QWidget):
             Qt.WindowStaysOnTopHint |
             Qt.Tool
         )
-        favicon_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "resources", "favicon.png"
-        )
+        favicon_path = resource_path("resources/favicon.PNG")
         if os.path.exists(favicon_path):
             self.setWindowIcon(QIcon(favicon_path))
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -1190,16 +1187,17 @@ class TypingOverlay(QWidget):
 
     def _load_status_frames(self) -> None:
         """Load the typing animation PNGs from resources/anims/status."""
-        base = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            "resources", "anims", "status",
-        )
+        base = resource_path("resources/anims/status")
         for i in range(1, 5):
             path = os.path.join(base, f"typing_{i:02d}.PNG")
-            if os.path.exists(path):
-                pix = QPixmap(path)
-                if not pix.isNull():
-                    self._status_frames.append(pix)
+            if not os.path.exists(path):
+                print(f"WARNING: status frame not found: {path}")
+                continue
+            pix = QPixmap(path)
+            if pix.isNull():
+                print(f"WARNING: status frame failed to load: {path}")
+                continue
+            self._status_frames.append(pix)
 
     def _tint_pixmap(self, pix: QPixmap, color: str) -> QPixmap:
         """Recolor a pixmap to the given color, preserving its alpha shape."""

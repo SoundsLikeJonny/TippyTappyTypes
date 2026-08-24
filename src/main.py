@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QIcon, QAction, QKeySequence
 from PySide6.QtCore import QObject, Signal, QEvent, Qt
 
-from project_info import Info
+from project_info import Info, resource_path
 from src.config import Config
 from src.database import Database
 from src.auth import GoogleAuth
@@ -100,10 +100,7 @@ class TippyTappyTypesApp(QObject):
             QIcon for system tray
         """
         import os
-        favicon_path = os.path.join(
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-            'resources', 'favicon.png'
-        )
+        favicon_path = resource_path('resources/favicon.PNG')
         if os.path.exists(favicon_path):
             return QIcon(favicon_path)
         

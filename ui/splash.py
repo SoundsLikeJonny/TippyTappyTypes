@@ -34,8 +34,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget, QDialog, QMainWindow,
 )
-from project_info import Info
-import resources
+from project_info import Info, resource_path
 from ui.generated.splash_screen import Ui_splash_screen
 
 
@@ -46,7 +45,10 @@ class SplashScreen(QDialog, Ui_splash_screen):
         super().__init__(*args)
         self.setupUi(self)
         self.splash_screen = QSplashScreen()
-        pixmap = QPixmap(Info.SPLASH_PATH)
+        splash_path = resource_path(Info.SPLASH_PATH)
+        pixmap = QPixmap(splash_path)
+        if pixmap.isNull():
+            print(f"WARNING: splash image not found or unsupported: {splash_path}")
         self.splash_screen.setPixmap(pixmap.scaledToWidth(200, Qt.SmoothTransformation))
         self.splash_screen.setWindowFlags(Qt.SplashScreen | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.label_footer.setText(f'{Info.COPYRIGHT}\n'

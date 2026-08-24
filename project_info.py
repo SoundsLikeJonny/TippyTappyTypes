@@ -15,6 +15,22 @@
 #      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import dataclasses
+import os
+import sys
+from pathlib import Path
+
+
+def resource_path(relative_path: str) -> str:
+    """Return the absolute path to a resource.
+
+    Works both in development (project root) and in a PyInstaller frozen build
+    (where resources are extracted to sys._MEIPASS).
+    """
+    if hasattr(sys, "_MEIPASS"):
+        base = sys._MEIPASS
+    else:
+        base = str(Path(__file__).parent.resolve())
+    return os.path.join(base, relative_path)
 
 
 @dataclasses.dataclass
@@ -26,7 +42,7 @@ class Info:
     NOTICE: str = 'Tiny but powerful!'
     RESOURCES_PATH: str = 'resources'
     ICON_PATH: str = f'{RESOURCES_PATH}/favicon.ico'
-    SPLASH_PATH: str = f'{RESOURCES_PATH}/splash.png'
+    SPLASH_PATH: str = f'{RESOURCES_PATH}/splash.PNG'
     DOCS_LINK: str = ''
     VERSION: str = '0.1.0-beta.23'
     GITHUB_REPO: str = 'SoundsLikeJonny/TippyTappyTypes'

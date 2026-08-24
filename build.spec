@@ -72,13 +72,14 @@ PyInstaller.config.CONF['distpath'] = f"{workfolder}"
 
 block_cipher = None
 
-import glob
+import os
 analysis_data = []
-for path in glob.glob('.\\resources\\*.png'):
-        analysis_data.append((path, '.\\resources\\'))
-
-for path in glob.glob('.\\resources\\*.ico'):
-        analysis_data.append((path, '.\\resources\\'))
+# Recursively bundle everything under ./resources so that subdirectories such
+# as anims/status are included in the build and keep their relative paths.
+for root, dirs, files in os.walk('resources'):
+    for name in files:
+        src = os.path.join(root, name)
+        analysis_data.append((src, root))
 
 # for path in glob.glob('./src/ui/gui/*.ui'):
 #         analysis_data.append((path, './src/ui/gui/'))
