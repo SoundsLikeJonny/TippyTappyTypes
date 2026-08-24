@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -15,7 +15,7 @@
 #      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 """
-Tippy Tappy Types launcher script.
+TippyTappyTypes launcher script.
 """
 if __name__ == "__main__":
     from src.main import main

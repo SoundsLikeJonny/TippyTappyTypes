@@ -21,7 +21,7 @@ venv/
 .vscode/
 .idea/
 
-# Local user data (config + typing stats) - stored in %APPDATA%\Tippy Tappy Types at runtime
+# Local user data (config + typing stats) - stored in %APPDATA%\TippyTappyTypes at runtime
 data/
 # Cloudflare OAuth worker - contains client secret, deploy manually
 oauth_server/

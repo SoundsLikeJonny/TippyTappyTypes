@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -54,7 +54,7 @@ class Updater(QObject):
             # best candidate depending on whether the running version is a pre-release.
             url = f"https://api.github.com/repos/{self.repo}/releases"
             req = urllib.request.Request(url)
-            req.add_header("User-Agent", "Tippy Tappy Types-Updater")
+            req.add_header("User-Agent", "TippyTappyTypes-Updater")
             req.add_header("Accept", "application/vnd.github+json")
             with urllib.request.urlopen(req, timeout=10) as resp:
                 releases = json.loads(resp.read().decode())
@@ -107,7 +107,7 @@ class Updater(QObject):
 
     def _download_and_install(self, url: str) -> None:
         try:
-            tmp_path = os.path.join(tempfile.gettempdir(), "Tippy Tappy Types-Update-Setup.exe")
+            tmp_path = os.path.join(tempfile.gettempdir(), "TippyTappyTypes-Update-Setup.exe")
 
             def _report(block_count, block_size, total_size):
                 if total_size > 0:

@@ -3,7 +3,7 @@
 
 
 
-# Tippy Tappy Types
+# TippyTappyTypes
 
 <img width="3840" height="2160" alt="IMG_1024" src="https://github.com/user-attachments/assets/410298d8-7b84-49cb-9a23-673cbe4da624" />
 

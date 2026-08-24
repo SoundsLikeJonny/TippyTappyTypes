@@ -159,9 +159,9 @@ class Ui_TypingOverlay(object):
     # setupUi
 
     def retranslateUi(self, TypingOverlay):
-        TypingOverlay.setWindowTitle(QCoreApplication.translate("TypingOverlay", u"Tippy Tappy Types Overlay", None))
+        TypingOverlay.setWindowTitle(QCoreApplication.translate("TypingOverlay", u"TippyTappyTypes Overlay", None))
 #if QT_CONFIG(tooltip)
-        self.label_update.setToolTip(QCoreApplication.translate("TypingOverlay", u"A new version of Tippy Tappy Types is available!", None))
+        self.label_update.setToolTip(QCoreApplication.translate("TypingOverlay", u"A new version of TippyTappyTypes is available!", None))
 #endif // QT_CONFIG(tooltip)
         self.label_update.setText("")
         self.label_status.setText("")

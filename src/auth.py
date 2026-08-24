@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -28,7 +28,7 @@ class GoogleAuth:
     
     def __init__(
         self,
-        oauth_server: str = "https://Tippy Tappy Types-oauth.YOUR-SUBDOMAIN.workers.dev",
+        oauth_server: str = "https://TippyTappyTypes-oauth.YOUR-SUBDOMAIN.workers.dev",
         token_path: str = "data/token.json"
     ) -> None:
         """

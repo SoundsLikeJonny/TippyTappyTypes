@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -23,9 +23,9 @@ from src.quotes_data import BUILTIN_QUOTES
 
 
 def _user_data_dir() -> str:
-    """Return the per-user data directory: %APPDATA%\\Tippy Tappy Types on Windows."""
+    """Return the per-user data directory: %APPDATA%\\TippyTappyTypes on Windows."""
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
-    return os.path.join(base, "Tippy Tappy Types")
+    return os.path.join(base, "TippyTappyTypes")
 
 
 class Config:
@@ -36,7 +36,7 @@ class Config:
         Initialize configuration manager.
 
         Args:
-            config_path: Path to configuration file. Defaults to %APPDATA%\\Tippy Tappy Types\\config.json.
+            config_path: Path to configuration file. Defaults to %APPDATA%\\TippyTappyTypes\\config.json.
         """
         if not config_path:
             config_path = os.path.join(_user_data_dir(), "config.json")

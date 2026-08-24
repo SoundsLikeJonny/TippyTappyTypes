@@ -1,4 +1,4 @@
-; Tippy Tappy Types NSIS Installer Script
+; TippyTappyTypes NSIS Installer Script
 ; Passed in from build.py:
 ;   /DAPP_VERSION=x.y.z
 ;   /DBUILD_DIR=path\to\builds\TippyTappyTypes_timestamp\TippyTappyTypes
@@ -12,11 +12,11 @@ Unicode True
   !define BUILD_DIR "dist\TippyTappyTypes"
 !endif
 
-!define APP_NAME        "Tippy Tappy Types"
+!define APP_NAME        "TippyTappyTypes"
 !define APP_PUBLISHER   "Jon Evans"
-!define APP_URL         "https://github.com/SoundsLikeJonny/Tippy Tappy Types"
-!define APP_EXE         "Tippy Tappy Types.exe"
-!define UNINSTALL_KEY   "Software\Microsoft\Windows\CurrentVersion\Uninstall\Tippy Tappy Types"
+!define APP_URL         "https://github.com/SoundsLikeJonny/TippyTappyTypes"
+!define APP_EXE         "TippyTappyTypes.exe"
+!define UNINSTALL_KEY   "Software\Microsoft\Windows\CurrentVersion\Uninstall\TippyTappyTypes"
 !define STARTUP_KEY     "Software\Microsoft\Windows\CurrentVersion\Run"
 
 Name "${APP_NAME} ${APP_VERSION}"
@@ -43,9 +43,9 @@ ShowUninstDetails show
 !insertmacro MUI_LANGUAGE "English"
 
 ; ---------------------------------------------------------------
-; Launch Tippy Tappy Types unelevated after install.
+; Launch TippyTappyTypes unelevated after install.
 ; The installer itself runs elevated (RequestExecutionLevel admin),
-; so a direct Run would make Tippy Tappy Types inherit elevation. An elevated
+; so a direct Run would make TippyTappyTypes inherit elevation. An elevated
 ; process cannot receive PowerToys/AutoHotkey injected keys (UIPI),
 ; so we shell out through the unelevated explorer.exe instead.
 ; ---------------------------------------------------------------
@@ -107,6 +107,6 @@ Section "Uninstall"
   DeleteRegKey  HKLM "${UNINSTALL_KEY}"
   DeleteRegValue HKCU "${STARTUP_KEY}" "${APP_NAME}"
 
-  ; NOTE: user data in %APPDATA%\Tippy Tappy Types is intentionally left intact
+  ; NOTE: user data in %APPDATA%\TippyTappyTypes is intentionally left intact
   ;       so the user's config and stats survive a reinstall.
 SectionEnd

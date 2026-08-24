@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -26,7 +26,7 @@ from src.auth import GoogleAuth
 
 
 class SettingsWindow(QMainWindow):
-    """Settings window for Tippy Tappy Types application."""
+    """Settings window for TippyTappyTypes application."""
 
     start_typing_test: Signal = Signal()
     settings_changed: Signal = Signal()

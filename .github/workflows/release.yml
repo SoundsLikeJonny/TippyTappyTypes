@@ -143,7 +143,7 @@ jobs:
       - name: Create installer
         run: |
           mkdir builds 2>nul
-          makensis /DAPP_VERSION=${{ steps.version.outputs.new }} /DBUILD_DIR=dist\Tippy Tappy Types installer.nsi
+          makensis /DAPP_VERSION=${{ steps.version.outputs.new }} /DBUILD_DIR=dist\TippyTappyTypes installer.nsi
         shell: cmd
 
       # ── Create GitHub Release ─────────────────────────────────
@@ -151,8 +151,8 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: Tippy Tappy Types ${{ steps.version.outputs.new }}
+          name: TippyTappyTypes ${{ steps.version.outputs.new }}
           body_path: RELEASE_NOTES.md
           prerelease: ${{ steps.version.outputs.prerelease }}
           files: |
-            builds/Tippy Tappy Types-Setup-${{ steps.version.outputs.new }}.exe
+            builds/TippyTappyTypes-Setup-${{ steps.version.outputs.new }}.exe

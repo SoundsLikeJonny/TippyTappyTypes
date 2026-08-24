@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -25,9 +25,9 @@ from datetime import datetime
 
 
 def _user_data_dir() -> str:
-    """Return the per-user data directory: %APPDATA%\\Tippy Tappy Types on Windows."""
+    """Return the per-user data directory: %APPDATA%\\TippyTappyTypes on Windows."""
     base = os.environ.get("APPDATA") or os.path.expanduser("~")
-    return os.path.join(base, "Tippy Tappy Types")
+    return os.path.join(base, "TippyTappyTypes")
 
 
 class Database:

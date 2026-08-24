@@ -1,4 +1,4 @@
-#      Tippy Tappy Types is a minimal typing test software that sits in the corner of your screen while you work!
+#      TippyTappyTypes is a minimal typing test software that sits in the corner of your screen while you work!
 #      Copyright (C) 2026 Jon Evans
 #
 #      This program is free software: you can redistribute it and/or modify
@@ -33,11 +33,11 @@ from src.updater import Updater
 from ui.splash import SplashScreen
 
 
-class Tippy Tappy TypesApp(QObject):
+class TippyTappyTypesApp(QObject):
     """Main application controller."""
 
     def __init__(self) -> None:
-        """Initialize Tippy Tappy Types application."""
+        """Initialize TippyTappyTypes application."""
         super().__init__()
         self.app: QApplication = QApplication(sys.argv)
         self.app.setQuitOnLastWindowClosed(False)
@@ -231,7 +231,7 @@ class Tippy Tappy TypesApp(QObject):
 def _relaunch_unelevated_if_needed() -> None:
     """If we're running elevated, relaunch unelevated via explorer.exe.
 
-    An elevated Tippy Tappy Types cannot receive keys injected by unelevated
+    An elevated TippyTappyTypes cannot receive keys injected by unelevated
     remappers (PowerToys Keyboard Manager, AutoHotkey, etc.) due to UIPI.
     This is most common after an NSIS install where the installer runs
     elevated and launches the app from the Finish page.
@@ -244,7 +244,7 @@ def _relaunch_unelevated_if_needed() -> None:
         return
 
     exe_path = sys.executable
-    # PyInstaller one-dir build: sys.executable is Tippy Tappy Types.exe.
+    # PyInstaller one-dir build: sys.executable is TippyTappyTypes.exe.
     # Dev mode: python.exe — do not relaunch (would recurse via venv python).
     if os.path.basename(exe_path).lower() == "python.exe":
         return
@@ -257,7 +257,7 @@ def _relaunch_unelevated_if_needed() -> None:
 def main() -> None:
     """Application entry point."""
     _relaunch_unelevated_if_needed()
-    app: Tippy Tappy TypesApp = Tippy Tappy TypesApp()
+    app: TippyTappyTypesApp = TippyTappyTypesApp()
     sys.exit(app.run())
 
 
