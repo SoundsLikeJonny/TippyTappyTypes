@@ -24,18 +24,16 @@ from PySide6.QtWidgets import QSizePolicy, QWidget
 class WpmGraphWidget(QWidget):
     """A lightweight, dependency-free line chart that plots WPM over time.
 
-    Draws two overlapping lines: the instantaneous WPM at each sample point
-    (primary color) and the running average WPM up to that point (secondary
-    color). Drawn with QPainter so no chart library is required. The widget is
-    placed in the .ui file so its size/position can be edited in Qt Designer;
-    the drawing logic lives here in src.
+    Draws a single line: the instantaneous WPM at each sample point, in the
+    theme's primary color. Drawn with QPainter so no chart library is required.
+    The widget is placed in the .ui file so its size/position can be edited in
+    Qt Designer; the drawing logic lives here in src.
     """
 
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self._samples: List[Tuple[float, float]] = []
         self._primary: QColor = QColor("#808080")
-        self._secondary: QColor = QColor("#8b047e")
         self._text_color: QColor = QColor("#aaaaaa")
         self._grid_color: QColor = QColor("#555555")
         self._window_color: QColor = QColor("#000000")
@@ -48,14 +46,12 @@ class WpmGraphWidget(QWidget):
         self,
         samples: List[Tuple[float, float]],
         primary: str = "#808080",
-        secondary: str = "#8b047e",
         text_color: str = "#aaaaaa",
         window_color: str = "#000000",
     ) -> None:
-        """Set the (elapsed_seconds, wpm) samples and line colors, then repaint."""
+        """Set the (elapsed_seconds, wpm) samples and line color, then repaint."""
         self._samples = list(samples)
         self._primary = QColor(primary)
-        self._secondary = QColor(secondary)
         self._text_color = QColor(text_color)
         self._window_color = QColor(window_color)
         self.update()
@@ -63,12 +59,10 @@ class WpmGraphWidget(QWidget):
     def set_colors(
         self,
         primary: str,
-        secondary: str,
         window_color: str = "#000000",
     ) -> None:
-        """Update the line colors without changing the data (theme changes)."""
+        """Update the line color without changing the data (theme changes)."""
         self._primary = QColor(primary)
-        self._secondary = QColor(secondary)
         self._window_color = QColor(window_color)
         self.update()
 
@@ -82,15 +76,6 @@ class WpmGraphWidget(QWidget):
     def minimumSizeHint(self):
         from PySide6.QtCore import QSize
         return QSize(0, 60)
-
-    def _running_average(self) -> List[float]:
-        """Cumulative average WPM up to each sample point."""
-        avg: List[float] = []
-        total = 0.0
-        for i, (_, w) in enumerate(self._samples, start=1):
-            total += w
-            avg.append(total / i)
-        return avg
 
     def _plot_rect(self) -> "QRect":
         from PySide6.QtCore import QRect
@@ -152,21 +137,17 @@ class WpmGraphWidget(QWidget):
 
         times = [s[0] for s in self._samples]
         wpm = [s[1] for s in self._samples]
-        avg = self._running_average()
 
         # Prepend a synthetic point at 0 seconds holding the first sample's
-        # value, so both lines begin at the 0-second mark at their actual
-        # starting WPM (a flat lead-in) rather than at 0 WPM. The running
-        # average is still computed over the real samples only.
+        # value, so the line begins at the 0-second mark at its actual
+        # starting WPM (a flat lead-in) rather than at 0 WPM.
         disp_times = [0.0] + times
         disp_wpm = [wpm[0]] + wpm
-        disp_avg = [avg[0]] + avg
 
         # Show the full test duration: the X axis starts at 0 seconds rather
         # than at the first sample's time.
         t_min, t_max = 0.0, times[-1]
-        all_vals = wpm + avg
-        w_min, w_max = min(all_vals), max(all_vals)
+        w_min, w_max = min(wpm), max(wpm)
         if t_max - t_min < 0.001:
             t_max = t_min + 1.0
         if w_max - w_min < 0.001:
@@ -229,52 +210,35 @@ class WpmGraphWidget(QWidget):
             painter.setPen(QPen(self._primary, 2))
             painter.drawPath(path)
 
-        # Running average line (secondary color), starting from the origin.
-        if len(self._samples) >= 1:
-            avg_path = QPainterPath()
-            avg_path.moveTo(to_x(disp_times[0]), to_y(disp_avg[0]))
-            for t, a in zip(disp_times[1:], disp_avg[1:]):
-                avg_path.lineTo(to_x(t), to_y(a))
-            painter.setPen(QPen(self._secondary, 2))
-            painter.drawPath(avg_path)
-
-        # Points (primary for WPM, secondary for average)
+        # Points (primary color)
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(self._primary)
         for t, w in self._samples:
             painter.drawEllipse(QPointF(to_x(t), to_y(w)), 2.0, 2.0)
-        painter.setBrush(self._secondary)
-        for t, a in zip(times, avg):
-            painter.drawEllipse(QPointF(to_x(t), to_y(a)), 2.0, 2.0)
 
-        # Hover indicator: vertical guide + WPM / Average readout at the
-        # sample nearest the mouse's X position.
+        # Hover indicator: vertical guide + WPM readout at the sample nearest
+        # the mouse's X position.
         if self._hover_index >= 0 and self._hover_index < len(self._samples):
             hx = to_x(times[self._hover_index])
             hy = to_y(wpm[self._hover_index])
-            ay = to_y(avg[self._hover_index])
 
             painter.setPen(QPen(self._text_color, 1, Qt.PenStyle.DashLine))
             painter.drawLine(
                 QPointF(hx, plot.top()), QPointF(hx, plot.bottom())
             )
 
-            # Highlight the hovered points.
+            # Highlight the hovered point.
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(self._primary)
             painter.drawEllipse(QPointF(hx, hy), 3.5, 3.5)
-            painter.setBrush(self._secondary)
-            painter.drawEllipse(QPointF(hx, ay), 3.5, 3.5)
 
             # Readout text, drawn inside the plot area so it is never clipped
-            # by the widget's top edge. WPM text matches the primary line,
-            # Avg text matches the secondary line, and the background uses the
-            # theme's window color.
+            # by the widget's top edge. The background uses the theme's window
+            # color.
             wpm_label = f"WPM: {wpm[self._hover_index]:.0f}"
-            avg_label = f"Avg: {avg[self._hover_index]:.0f}"
             painter.setFont(font)
             fm = painter.fontMetrics()
-            text_w = fm.horizontalAdvance(wpm_label) + 8 + fm.horizontalAdvance(avg_label)
+            text_w = fm.horizontalAdvance(wpm_label)
             text_h = fm.height()
             box = QRectF(
                 plot.left() + 2,
@@ -292,10 +256,4 @@ class WpmGraphWidget(QWidget):
                 text_rect,
                 Qt.AlignLeft | Qt.AlignVCenter,
                 wpm_label,
-            )
-            painter.setPen(QPen(self._secondary, 1))
-            painter.drawText(
-                text_rect.adjusted(fm.horizontalAdvance(wpm_label) + 8, 0, 0, 0),
-                Qt.AlignLeft | Qt.AlignVCenter,
-                avg_label,
             )

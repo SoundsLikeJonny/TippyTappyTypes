@@ -141,13 +141,19 @@ class TypingOverlay(QWidget):
         self.status_text: str = ""
         self.status_anim_frame: int = 0
 
-        # WPM-over-time tracking and results/graph cycling.
+        # WPM-over-time tracking and results/graph toggling.
         self.wpm_samples: List[Tuple[float, float]] = []
         self._show_graph: bool = False
         self._hovering: bool = False
-        self.results_cycle_timer = QTimer()
-        self.results_cycle_timer.setInterval(3000)
-        self.results_cycle_timer.timeout.connect(self._toggle_results_view)
+
+        # Personal bests are cached per pr_key so no read happens per test.
+        self._pr_cache: Dict[str, float] = {}
+        self._pr_flash_on: bool = False
+        self._pr_flash_remaining: int = 0
+        self.pr_flash_timer = QTimer()
+        self.pr_flash_timer.setInterval(120)
+        self.pr_flash_timer.timeout.connect(self._on_pr_flash_tick)
+        self._load_personal_bests()
 
         self._child_filter = ChildEventFilter(self)
 
@@ -563,7 +569,6 @@ class TypingOverlay(QWidget):
         if graph is not None and graph.isVisible():
             graph.set_colors(
                 theme.get("primary", "#808080"),
-                theme.get("secondary", "#8b047e"),
                 theme.get("window", "#000000"),
             )
 
@@ -614,7 +619,7 @@ class TypingOverlay(QWidget):
         self.last_keypress_time = time_module.time()
         self.wpm_samples = []
         self._show_graph = False
-        self.results_cycle_timer.stop()
+        self._stop_pr_flash()
         graph = self._get_widget("widget_wpm_graph")
         if graph is not None:
             graph.setVisible(False)
@@ -902,15 +907,32 @@ class TypingOverlay(QWidget):
                 self.user_email, self.engine.ngram_errors, self.engine.ngram_total
             )
 
+        # Personal best for this mode + option + word pool combination.
+        # A bucket with no stored best records the first result silently:
+        # there is no record to beat yet, so nothing is announced or flashed.
+        pr_key = self._pr_key()
+        previous_pr = self._pr_cache.get(pr_key)
+        is_new_best = previous_pr is not None and wpm > previous_pr
+        if previous_pr is None or is_new_best:
+            self._pr_cache[pr_key] = wpm
+            self.database.save_personal_best(self.user_email, pr_key, wpm, accuracy)
+
         # Ensure the final WPM is captured in the samples for the graph.
         if not self.wpm_samples or self.wpm_samples[-1][0] < duration - 0.5:
             self.wpm_samples.append((duration, wpm))
 
         typed_color = self.config.get("typed_color", "#8b047e")
+        best_line = ""
+        if is_new_best:
+            best_line = (
+                f'<span style="color:{typed_color};font-weight:bold;">'
+                f"New Personal Best: {wpm:.1f} WPM</span><br>"
+            )
         self.ui.label_text.setText(
+            f"{best_line}"
             f'<span style="color:{typed_color};">'
             f"WPM: {wpm:.1f}  |  Accuracy: {accuracy:.1f}%  |  "
-            f"Time: {duration:.1f}s  |  Press TAB to restart"
+            f"Time: {duration:.1f}s  |  SPACE: graph  |  TAB: restart"
             f"</span>"
         )
 
@@ -923,18 +945,21 @@ class TypingOverlay(QWidget):
         self.ui.label_text.setVisible(True)
         self._show_graph = False
         self._resize_to_fit()
-        self.results_cycle_timer.start()
+        if is_new_best:
+            self._start_pr_flash()
 
         self.test_completed.emit({"wpm": wpm, "accuracy": accuracy,
                                   "duration": duration, "mistakes": self.engine.mistakes})
 
     def _toggle_results_view(self) -> None:
-        """Cycle between the results label and the WPM graph. Paused on hover."""
-        if not self.showing_results or self._hovering:
+        """Switch between the results label and the WPM graph (Space)."""
+        if not self.showing_results:
+            return
+        graph = self._get_widget("widget_wpm_graph")
+        if graph is None:
             return
         self._show_graph = not self._show_graph
-        graph = self._get_widget("widget_wpm_graph")
-        if self._show_graph and graph is not None:
+        if self._show_graph:
             self.ui.label_text.setVisible(False)
             graph.setVisible(True)
             graph.update()
@@ -944,10 +969,67 @@ class TypingOverlay(QWidget):
         self._resize_to_fit()
 
     def _set_hovering(self, hovering: bool) -> None:
-        """Pause/resume results cycling based on mouse hover."""
+        """Track mouse hover so the graph readout can react to it."""
         self._hovering = hovering
-        if not hovering and self.showing_results:
-            self.results_cycle_timer.start()
+
+    # ------------------------------------------------------------------
+    # Personal bests
+    # ------------------------------------------------------------------
+
+    def _pr_key(self) -> str:
+        """Stable key identifying the personal-best bucket for the next test.
+
+        Word and timed tests are bucketed by mode, option and word pool, so
+        every pool keeps its own best. Quotes are bucketed by length only,
+        because the quote itself is chosen at random.
+        """
+        if self.active_mode == MODE_QUOTES:
+            return f"quotes:{QUOTE_OPTIONS[self.quote_index]}"
+        if self.active_mode == MODE_TIME:
+            return f"time:{TIME_OPTIONS[self.time_index]}:{self.current_test_name}"
+        return f"words:{WORD_COUNT_OPTIONS[self.word_count_index]}:{self.current_test_name}"
+
+    def _load_personal_bests(self) -> None:
+        """Refresh the in-memory personal-best cache from the database.
+
+        Merges by keeping the higher value per key instead of replacing the
+        cache. Writes are queued on a background thread, so a read issued
+        right after a test can still return the pre-test row; replacing the
+        cache with that stale snapshot discards the best just recorded, and
+        no later test can beat a value that is no longer there.
+        """
+        stored = self.database.get_personal_bests(self.user_email)
+        for key, wpm in stored.items():
+            current = self._pr_cache.get(key)
+            if current is None or wpm > current:
+                self._pr_cache[key] = wpm
+
+    def _current_pr(self) -> Optional[float]:
+        """Best WPM recorded for the current mode/option/pool, if any."""
+        return self._pr_cache.get(self._pr_key())
+
+    def _start_pr_flash(self) -> None:
+        """Flash the window by inverting its colors a few times."""
+        self._pr_flash_remaining = 6
+        self._pr_flash_on = True
+        self.pr_flash_timer.start()
+        self.update()
+
+    def _stop_pr_flash(self) -> None:
+        """End the personal-best flash and restore the normal background."""
+        self.pr_flash_timer.stop()
+        self._pr_flash_remaining = 0
+        if self._pr_flash_on:
+            self._pr_flash_on = False
+            self.update()
+
+    def _on_pr_flash_tick(self) -> None:
+        self._pr_flash_remaining -= 1
+        if self._pr_flash_remaining <= 0:
+            self._stop_pr_flash()
+            return
+        self._pr_flash_on = not self._pr_flash_on
+        self.update()
 
     # ------------------------------------------------------------------
     # Hotkeys / input
@@ -1058,6 +1140,8 @@ class TypingOverlay(QWidget):
             return
 
         if self.showing_results:
+            if event.key() == Qt.Key_Space:
+                self._toggle_results_view()
             return
 
         if event.key() == Qt.Key_Backspace:
@@ -1279,8 +1363,11 @@ class TypingOverlay(QWidget):
             stats = self.database.get_stats(self.user_email)
             avg_wpm = stats.get("avg_wpm", 0.0)
             avg_acc = stats.get("avg_accuracy", 0.0)
+            pr = self._current_pr()
+            pr_text = f"{pr:.1f}" if pr is not None else "--"
             text = (
                 f"Test: {self.current_test_name}  |  "
+                f"PR: {pr_text}  |  "
                 f"Avg WPM: {avg_wpm:.1f}  |  "
                 f"Avg Accuracy: {avg_acc:.1f}%"
             )
@@ -1335,7 +1422,12 @@ class TypingOverlay(QWidget):
         window_color = self.config.get("window_color", "#000000")
         from PySide6.QtGui import QColor
         base = QColor(window_color)
-        base.setAlpha(bg_opacity)
+        if self._pr_flash_on:
+            # Personal-best flash: invert the window color at full opacity.
+            base = QColor(255 - base.red(), 255 - base.green(), 255 - base.blue())
+            base.setAlpha(255)
+        else:
+            base.setAlpha(bg_opacity)
         painter.fillRect(self.rect(), base)
 
     def enterEvent(self, event) -> None:
@@ -1446,9 +1538,15 @@ class TypingOverlay(QWidget):
             self.update_requested.emit()
 
     def update_user(self, user_email: Optional[str]) -> None:
+        changed = user_email != self.user_email
         self.user_email = user_email
         self._load_problem_chars()
         self._load_problem_ngrams()
+        # Only re-read personal bests when the account actually changed. This
+        # is also called after every completed test, and reloading there would
+        # race the queued write and drop the best just recorded.
+        if changed:
+            self._load_personal_bests()
 
     def apply_config(self) -> None:
         self._apply_config()
