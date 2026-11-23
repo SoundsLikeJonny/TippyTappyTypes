@@ -99,6 +99,20 @@ class Database:
                 total_typed INTEGER
             )
         """)
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS personal_bests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_email TEXT,
+                pr_key TEXT,
+                wpm REAL,
+                accuracy REAL,
+                timestamp TEXT
+            )
+        """)
+        cursor.execute("""
+            CREATE INDEX IF NOT EXISTS idx_personal_bests_key
+            ON personal_bests (user_email, pr_key)
+        """)
         conn.commit()
         conn.close()
 
@@ -128,6 +142,8 @@ class Database:
                     self._do_update_char_stats(conn, *args)
                 elif op == "update_ngram_stats":
                     self._do_update_ngram_stats(conn, *args)
+                elif op == "save_personal_best":
+                    self._do_save_personal_best(conn, *args)
             except Exception:
                 pass  # never crash the writer thread
             finally:
@@ -202,6 +218,34 @@ class Database:
                 )
         conn.commit()
 
+    def _do_save_personal_best(
+        self,
+        conn: sqlite3.Connection,
+        user_email: Optional[str],
+        pr_key: str,
+        wpm: float,
+        accuracy: float,
+    ) -> None:
+        row = conn.execute(
+            """SELECT id, wpm FROM personal_bests
+               WHERE user_email IS ? AND pr_key = ?""",
+            (user_email, pr_key),
+        ).fetchone()
+        if row:
+            if wpm > row[1]:
+                conn.execute(
+                    """UPDATE personal_bests SET wpm = ?, accuracy = ?, timestamp = ?
+                       WHERE id = ?""",
+                    (wpm, accuracy, datetime.now().isoformat(), row[0]),
+                )
+        else:
+            conn.execute(
+                """INSERT INTO personal_bests (user_email, pr_key, wpm, accuracy, timestamp)
+                   VALUES (?, ?, ?, ?, ?)""",
+                (user_email, pr_key, wpm, accuracy, datetime.now().isoformat()),
+            )
+        conn.commit()
+
     # ------------------------------------------------------------------
     # Public write API  (UI thread — non-blocking)
     # ------------------------------------------------------------------
@@ -215,6 +259,17 @@ class Database:
         duration: float,
     ) -> None:
         self._write_queue.put(("save_test", (user_email, wpm, accuracy, mistakes, duration)))
+
+    def save_personal_best(
+        self,
+        user_email: Optional[str],
+        pr_key: str,
+        wpm: float,
+        accuracy: float,
+    ) -> None:
+        self._write_queue.put(
+            ("save_personal_best", (user_email, pr_key, wpm, accuracy))
+        )
 
     def update_char_stats(
         self,
@@ -287,6 +342,24 @@ class Database:
             conn.close()
 
         return {"problem_ngrams": ngrams}
+
+    def get_personal_bests(self, user_email: Optional[str]) -> Dict[str, float]:
+        """Return every stored personal best for the user, keyed by pr_key."""
+        conn = self._open_conn()
+        try:
+            if user_email is None:
+                rows = conn.execute(
+                    "SELECT pr_key, wpm FROM personal_bests WHERE user_email IS NULL"
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT pr_key, wpm FROM personal_bests WHERE user_email = ?",
+                    (user_email,),
+                ).fetchall()
+        finally:
+            conn.close()
+
+        return {row[0]: row[1] for row in rows}
 
     # ------------------------------------------------------------------
     # Shutdown
