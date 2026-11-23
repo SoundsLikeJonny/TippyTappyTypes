@@ -26,6 +26,7 @@ from project_info import Info, resource_path
 from src.typing_engine import TypingEngine
 from src.config import Config
 from src.database import Database
+from src.character_window import CharacterWindow
 
 
 WORD_COUNT_OPTIONS: List[int] = [10, 25, 50, 100]
@@ -195,6 +196,13 @@ class TypingOverlay(QWidget):
         self._update_version_label()
         # Resize height to fit only the currently visible widgets at startup.
         self._resize_to_fit()
+
+        # Companion window holding only the character. It is not a child of
+        # this widget: it must stay visible while the overlay is hidden.
+        self.character = CharacterWindow(self.config)
+        self.character.clicked.connect(self._toggle_visibility)
+        self.character.align_to(self.geometry())
+        self.character.show()
 
     def _ensure_widget_wrappers(self) -> None:
         """Guarantee widget_details/widget_about exist after setupUi.
@@ -457,6 +465,43 @@ class TypingOverlay(QWidget):
         super().moveEvent(event)
         if getattr(self, "config", None) is not None:
             self._save_position()
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.align_to(self.geometry())
+
+    def resizeEvent(self, event) -> None:
+        """Keep the character window touching the overlay after a resize."""
+        super().resizeEvent(event)
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.align_to(self.geometry())
+
+    def closeEvent(self, event) -> None:
+        """Close the companion character window with the overlay."""
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.close()
+        super().closeEvent(event)
+
+    def toggle_visibility(self) -> None:
+        """Public entry point for showing or hiding the overlay."""
+        self._toggle_visibility()
+
+    def _toggle_visibility(self) -> None:
+        """Show or hide the overlay, driven by a click on the character."""
+        if self.isVisible():
+            self.hide()
+            return
+        self._show_aligned()
+
+    def _show_aligned(self) -> None:
+        """Show the overlay so its left edge touches the character window."""
+        character = getattr(self, "character", None)
+        if character is not None:
+            self.move(character.overlay_position(self.size()))
+        self.show()
+        self.activateWindow()
+        self.setFocus()
 
     def _load_problem_chars(self) -> None:
         stats: Dict[str, Any] = self.database.get_stats(self.user_email)
@@ -1338,9 +1383,15 @@ class TypingOverlay(QWidget):
         self._status_anim_index = (self._status_anim_index + 1) % len(self._status_frames)
         if self.status_text == STATUS_TYPING:
             self._show_status_image(active=True)
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.advance()
 
     def _set_status(self, status: str) -> None:
         self.status_text = status
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.set_active(status == STATUS_TYPING)
         if status == STATUS_TYPING:
             self._show_status_image(active=True)
             return
@@ -1563,3 +1614,7 @@ class TypingOverlay(QWidget):
         self._update_display()
         self._update_mode_labels()
         self._install_child_filter()
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.apply_theme()
+            character.align_to(self.geometry())

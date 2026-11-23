@@ -12,6 +12,13 @@ Entries are grouped under `### Added`, `### Changed`, `### Deprecated`, `### Rem
 
 ### Added
 
+- Companion character window: a second frameless always-on-top window holding only the tinted
+  animation frame, placed immediately left of the typing overlay and vertically centred so the two
+  touch with no gap. Clicking it hides the overlay; clicking again shows it, re-aligned to the
+  character's right edge. It follows the overlay when the overlay is dragged or resized, and it
+  stays visible while the overlay is hidden.
+- "Toggle Typing Window" in the tray menu, so the overlay can be shown or hidden when the character
+  window cannot be clicked. It recreates the overlay if it does not exist.
 - System notification on a new personal best, on by default, shown through the tray icon with the
   WPM, the accuracy and the previous best. Toggle: Settings → Typing → Display Settings →
   "Personal Best Alert".
