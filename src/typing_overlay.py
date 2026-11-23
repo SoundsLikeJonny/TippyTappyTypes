@@ -26,6 +26,7 @@ from project_info import Info, resource_path
 from src.typing_engine import TypingEngine
 from src.config import Config
 from src.database import Database
+from src.character_window import CharacterWindow
 
 
 WORD_COUNT_OPTIONS: List[int] = [10, 25, 50, 100]
@@ -181,20 +182,23 @@ class TypingOverlay(QWidget):
         self.theme_banner_timer.timeout.connect(self._clear_theme_banner)
         self._theme_banner_showing = False
 
-        # Status animation: cycle through typing PNGs per keystroke, and bob
-        # the first frame every 300ms while idle.
+        # Status animation: cycle through typing PNGs per keystroke. The
+        # character itself is drawn by the companion CharacterWindow.
         self._status_frames: List[QPixmap] = []
         self._status_anim_index: int = 0
-        self._idle_bob_phase: int = 0
-        self._status_idle_timer = QTimer()
-        self._status_idle_timer.setInterval(300)
-        self._status_idle_timer.timeout.connect(self._on_status_idle_tick)
         self._load_status_frames()
 
         self._update_keys_label()
         self._update_version_label()
         # Resize height to fit only the currently visible widgets at startup.
         self._resize_to_fit()
+
+        # Companion window holding only the character. It is not a child of
+        # this widget: it must stay visible while the overlay is hidden.
+        self.character = CharacterWindow(self.config)
+        self.character.clicked.connect(self._toggle_visibility)
+        self.character.align_to(self.geometry())
+        self.character.show()
 
     def _ensure_widget_wrappers(self) -> None:
         """Guarantee widget_details/widget_about exist after setupUi.
@@ -457,6 +461,43 @@ class TypingOverlay(QWidget):
         super().moveEvent(event)
         if getattr(self, "config", None) is not None:
             self._save_position()
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.align_to(self.geometry())
+
+    def resizeEvent(self, event) -> None:
+        """Keep the character window touching the overlay after a resize."""
+        super().resizeEvent(event)
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.align_to(self.geometry())
+
+    def closeEvent(self, event) -> None:
+        """Close the companion character window with the overlay."""
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.close()
+        super().closeEvent(event)
+
+    def toggle_visibility(self) -> None:
+        """Public entry point for showing or hiding the overlay."""
+        self._toggle_visibility()
+
+    def _toggle_visibility(self) -> None:
+        """Show or hide the overlay, driven by a click on the character."""
+        if self.isVisible():
+            self.hide()
+            return
+        self._show_aligned()
+
+    def _show_aligned(self) -> None:
+        """Show the overlay so its left edge touches the character window."""
+        character = getattr(self, "character", None)
+        if character is not None:
+            self.move(character.overlay_position(self.size()))
+        self.show()
+        self.activateWindow()
+        self.setFocus()
 
     def _load_problem_chars(self) -> None:
         stats: Dict[str, Any] = self.database.get_stats(self.user_email)
@@ -574,18 +615,16 @@ class TypingOverlay(QWidget):
             )
 
         self._theme_banner_showing = True
-        self._status_idle_timer.stop()
         self.ui.label_status.setText(
             f'<span style="color:{theme.get("secondary", "#8b047e")};'
             f'font-size:9px;font-weight:bold;">{theme["name"]}</span>'
         )
         self.theme_banner_timer.start(2000)
 
-        # Re-tint the status animation with the new theme's secondary color.
-        if self.status_text == STATUS_TYPING:
-            self._show_status_image(active=True)
-        elif self.status_text in (STATUS_STOPPED, STATUS_UNFOCUSED, STATUS_UNRESPONSIVE) or not self.status_text:
-            self._show_status_image(active=False)
+        # Re-tint the companion character with the new theme's color.
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.apply_theme()
 
     def _clear_theme_banner(self) -> None:
         self._theme_banner_showing = False
@@ -1270,7 +1309,6 @@ class TypingOverlay(QWidget):
 
     def _show_quote_credit(self) -> None:
         """Show the current quote's author in the status label."""
-        self._status_idle_timer.stop()
         color = self.config.get("typed_color", "#8b047e")
         self.ui.label_status.setText(
             f'<span style="color:{color};font-size:9px;">— {self.current_quote_author}</span>'
@@ -1292,64 +1330,26 @@ class TypingOverlay(QWidget):
                 continue
             self._status_frames.append(pix)
 
-    def _tint_pixmap(self, pix: QPixmap, color: str) -> QPixmap:
-        """Recolor a pixmap to the given color, preserving its alpha shape."""
-        tinted = QPixmap(pix.size())
-        tinted.fill(Qt.transparent)
-        p = QPainter(tinted)
-        p.drawPixmap(0, 0, pix)
-        p.setCompositionMode(QPainter.CompositionMode.CompositionMode_SourceIn)
-        p.fillRect(tinted.rect(), QColor(color))
-        p.end()
-        return tinted
-
-    def _show_status_image(self, active: bool) -> None:
-        """Show the typing animation. When active, show the current frame;
-        when idle, show the first frame with a slight bob."""
-        if not self._status_frames:
-            return
-        color = self.config.get("typed_color", "#8b047e")
-        if active:
-            self._status_idle_timer.stop()
-            frame = self._status_frames[self._status_anim_index % len(self._status_frames)]
-            self.ui.label_status.setPixmap(self._tint_pixmap(frame, color))
-        else:
-            frame = self._status_frames[0]
-            offset = 2 if self._idle_bob_phase else 0
-            canvas = QPixmap(frame.width(), frame.height() + 4)
-            canvas.fill(Qt.transparent)
-            p = QPainter(canvas)
-            p.drawPixmap(0, offset, frame)
-            p.end()
-            self.ui.label_status.setPixmap(self._tint_pixmap(canvas, color))
-            if not self._status_idle_timer.isActive():
-                self._status_idle_timer.start()
-                self._resize_to_fit()
-
-    def _on_status_idle_tick(self) -> None:
-        """Advance the idle bob phase and re-render the idle image."""
-        self._idle_bob_phase = 1 - self._idle_bob_phase
-        self._show_status_image(active=False)
-
     def _advance_status_anim(self) -> None:
         """Advance to the next typing frame (called on each character typed)."""
         if not self._status_frames:
             return
         self._status_anim_index = (self._status_anim_index + 1) % len(self._status_frames)
-        if self.status_text == STATUS_TYPING:
-            self._show_status_image(active=True)
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.advance()
 
     def _set_status(self, status: str) -> None:
         self.status_text = status
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.set_active(status == STATUS_TYPING)
         if status == STATUS_TYPING:
-            self._show_status_image(active=True)
             return
         if status in (STATUS_STOPPED, STATUS_UNFOCUSED, STATUS_UNRESPONSIVE) or not status:
-            self._show_status_image(active=False)
             return
 
         # Transient text message (e.g. "Font size: 24").
-        self._status_idle_timer.stop()
         self.status_anim_frame = (self.status_anim_frame + 1) % 4
         dots = "." * self.status_anim_frame
         color = "#aaaaaa"
@@ -1563,3 +1563,7 @@ class TypingOverlay(QWidget):
         self._update_display()
         self._update_mode_labels()
         self._install_child_filter()
+        character = getattr(self, "character", None)
+        if character is not None:
+            character.apply_theme()
+            character.align_to(self.geometry())

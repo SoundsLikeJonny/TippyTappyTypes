@@ -75,6 +75,10 @@ class TippyTappyTypesApp(QObject):
         start_action: QAction = QAction("Start Typing Test", self.app)
         start_action.triggered.connect(self._show_typing_overlay)
         tray_menu.addAction(start_action)
+
+        toggle_action: QAction = QAction("Toggle Typing Window", self.app)
+        toggle_action.triggered.connect(self._toggle_typing_overlay)
+        tray_menu.addAction(toggle_action)
         
         settings_action: QAction = QAction("Settings", self.app)
         settings_action.triggered.connect(self._show_settings)
@@ -169,6 +173,17 @@ class TippyTappyTypesApp(QObject):
         self.overlay.activateWindow()
         self.overlay.setFocus()
     
+    def _toggle_typing_overlay(self) -> None:
+        """Show or hide the typing overlay from the tray menu.
+
+        Creates the overlay first if it does not exist yet, so this works as a
+        fallback when the character window cannot be clicked.
+        """
+        if self.overlay is None:
+            self._show_typing_overlay()
+            return
+        self.overlay.toggle_visibility()
+
     def _show_settings(self) -> None:
         """Show settings window."""
         self.settings_window.show()
