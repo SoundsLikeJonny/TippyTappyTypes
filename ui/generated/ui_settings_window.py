@@ -352,6 +352,28 @@ class Ui_SettingsWindow(object):
 
         self.formLayout_4.setLayout(3, QFormLayout.FieldRole, self.horizontalLayout_align)
 
+        self.label_notifyPersonalBest = QLabel(self.groupBox_display)
+        self.label_notifyPersonalBest.setObjectName(u"label_notifyPersonalBest")
+
+        self.formLayout_4.setWidget(4, QFormLayout.LabelRole, self.label_notifyPersonalBest)
+
+        self.checkBox_notifyPersonalBest = QCheckBox(self.groupBox_display)
+        self.checkBox_notifyPersonalBest.setObjectName(u"checkBox_notifyPersonalBest")
+        self.checkBox_notifyPersonalBest.setChecked(True)
+
+        self.formLayout_4.setWidget(4, QFormLayout.FieldRole, self.checkBox_notifyPersonalBest)
+
+        self.label_flashPersonalBest = QLabel(self.groupBox_display)
+        self.label_flashPersonalBest.setObjectName(u"label_flashPersonalBest")
+
+        self.formLayout_4.setWidget(5, QFormLayout.LabelRole, self.label_flashPersonalBest)
+
+        self.checkBox_flashPersonalBest = QCheckBox(self.groupBox_display)
+        self.checkBox_flashPersonalBest.setObjectName(u"checkBox_flashPersonalBest")
+        self.checkBox_flashPersonalBest.setChecked(True)
+
+        self.formLayout_4.setWidget(5, QFormLayout.FieldRole, self.checkBox_flashPersonalBest)
+
 
         self.verticalLayout_3.addWidget(self.groupBox_display)
 
@@ -617,6 +639,10 @@ class Ui_SettingsWindow(object):
         self.label_textAlign.setText(QCoreApplication.translate("SettingsWindow", u"Caret Alignment:", None))
         self.radio_alignCenter.setText(QCoreApplication.translate("SettingsWindow", u"Centered", None))
         self.radio_alignLeft.setText(QCoreApplication.translate("SettingsWindow", u"Left-aligned", None))
+        self.label_notifyPersonalBest.setText(QCoreApplication.translate("SettingsWindow", u"Personal Best Alert:", None))
+        self.checkBox_notifyPersonalBest.setText(QCoreApplication.translate("SettingsWindow", u"Show a system notification", None))
+        self.label_flashPersonalBest.setText(QCoreApplication.translate("SettingsWindow", u"Personal Best Flash:", None))
+        self.checkBox_flashPersonalBest.setText(QCoreApplication.translate("SettingsWindow", u"Flash the window on a new best", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_typing), QCoreApplication.translate("SettingsWindow", u"Typing", None))
         self.groupBox_account.setTitle(QCoreApplication.translate("SettingsWindow", u"Google Account", None))
         self.label_accountStatus.setText(QCoreApplication.translate("SettingsWindow", u"Not logged in", None))

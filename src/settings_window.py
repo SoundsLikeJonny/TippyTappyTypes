@@ -84,6 +84,12 @@ class SettingsWindow(QMainWindow):
         self.ui.spinBox_width.setValue(self.config.get("typing_width", 1200))
         self.ui.spinBox_height.setValue(self.config.get("typing_height", 120))
         self.ui.checkBox_showBorder.setChecked(self.config.get("show_border", False))
+        self.ui.checkBox_notifyPersonalBest.setChecked(
+            self.config.get("notify_personal_best", True)
+        )
+        self.ui.checkBox_flashPersonalBest.setChecked(
+            self.config.get("flash_personal_best", True)
+        )
 
         text_align: str = self.config.get("text_align", "center")
         if text_align == "left":
@@ -143,6 +149,10 @@ class SettingsWindow(QMainWindow):
         self.config.set("typing_width", self.ui.spinBox_width.value())
         self.config.set("typing_height", self.ui.spinBox_height.value())
         self.config.set("show_border", self.ui.checkBox_showBorder.isChecked())
+        self.config.set("notify_personal_best",
+                        self.ui.checkBox_notifyPersonalBest.isChecked())
+        self.config.set("flash_personal_best",
+                        self.ui.checkBox_flashPersonalBest.isChecked())
 
         self.config.set("hotkey_cycle_mode_left",
                         self.ui.keySeq_cycleOptionLeft.keySequence().toString())

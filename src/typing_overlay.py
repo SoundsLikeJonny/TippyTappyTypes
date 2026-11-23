@@ -101,6 +101,7 @@ class ChildEventFilter(QObject):
 
 class TypingOverlay(QWidget):
     test_completed: Signal = Signal(dict)
+    personal_best: Signal = Signal(dict)
     update_requested: Signal = Signal()
 
     def __init__(
@@ -946,7 +947,15 @@ class TypingOverlay(QWidget):
         self._show_graph = False
         self._resize_to_fit()
         if is_new_best:
-            self._start_pr_flash()
+            if self.config.get("flash_personal_best", True):
+                self._start_pr_flash()
+            if self.config.get("notify_personal_best", True):
+                self.personal_best.emit({
+                    "wpm": wpm,
+                    "accuracy": accuracy,
+                    "previous_wpm": previous_pr,
+                    "pr_key": pr_key,
+                })
 
         self.test_completed.emit({"wpm": wpm, "accuracy": accuracy,
                                   "duration": duration, "mistakes": self.engine.mistakes})

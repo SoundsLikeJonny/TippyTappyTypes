@@ -77,6 +77,8 @@ class Config:
             "typing_width": 500,
             "typing_height": 60,
             "show_border": False,
+            "notify_personal_best": True,
+            "flash_personal_best": True,
             "active_test": 0,
             "active_mode": "words",
             "word_count_index": 2,

@@ -161,6 +161,9 @@ class TippyTappyTypesApp(QObject):
             self.overlay.test_completed.connect(
                 self._handle_test_completed
             )
+            self.overlay.personal_best.connect(
+                self._handle_personal_best
+            )
 
         self.overlay.show()
         self.overlay.activateWindow()
@@ -186,6 +189,28 @@ class TippyTappyTypesApp(QObject):
         if self.overlay:
             self.overlay.update_user(self.auth.user_email)
     
+    def _handle_personal_best(self, results: dict) -> None:
+        """
+        Show a system notification for a new personal best.
+
+        Args:
+            results: Personal best details (wpm, accuracy, previous_wpm, pr_key)
+        """
+        if not self.tray_icon.isSystemTrayAvailable():
+            return
+        wpm = results.get("wpm", 0.0)
+        accuracy = results.get("accuracy", 0.0)
+        previous = results.get("previous_wpm")
+        body = f"{wpm:.1f} WPM at {accuracy:.1f}% accuracy"
+        if previous is not None:
+            body += f", up from {previous:.1f} WPM"
+        self.tray_icon.showMessage(
+            "New Personal Best",
+            body,
+            QSystemTrayIcon.MessageIcon.Information,
+            5000,
+        )
+
     def _handle_update_available(self, latest_version: str, download_url: str) -> None:
         """Show update badge on overlay when a new release is found."""
         if self.overlay:
