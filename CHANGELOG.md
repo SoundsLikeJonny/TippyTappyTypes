@@ -12,6 +12,12 @@ Entries are grouped under `### Added`, `### Changed`, `### Deprecated`, `### Rem
 
 ### Added
 
+- System notification on a new personal best, on by default, shown through the tray icon with the
+  WPM, the accuracy and the previous best. Toggle: Settings → Typing → Display Settings →
+  "Personal Best Alert".
+- "Personal Best Flash" toggle in the same group, on by default, for the inverted-colour flash.
+  Both can be turned off independently, so the banner still appears while the notification, the
+  flash, or both are suppressed.
 - `AGENTS.md`: the operating contract for AI agents and new contributors. It records the
   architecture, the fifteen hard rules, the hotkey table, the repository map, the PowerShell
   commands, the build/install verification checklist, the privacy boundary, the naming

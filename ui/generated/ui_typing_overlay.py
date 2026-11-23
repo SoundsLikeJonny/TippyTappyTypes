@@ -3,7 +3,7 @@
 ################################################################################
 ## Form generated from reading UI file 'ui_typing_overlay.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.7.0
+## Created by: Qt User Interface Compiler version 6.7.2
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
@@ -83,7 +83,7 @@ class Ui_TypingOverlay(object):
         sizePolicy3.setVerticalStretch(0)
         sizePolicy3.setHeightForWidth(self.label_wordCount.sizePolicy().hasHeightForWidth())
         self.label_wordCount.setSizePolicy(sizePolicy3)
-        self.label_wordCount.setCursor(QCursor(Qt.PointingHandCursor))
+        self.label_wordCount.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.label_wordCount.setStyleSheet(u"font-size: 9px; background: transparent; padding: 1px 4px;")
         self.label_wordCount.setAlignment(Qt.AlignCenter)
 
@@ -93,7 +93,7 @@ class Ui_TypingOverlay(object):
         self.label_timedTest.setObjectName(u"label_timedTest")
         sizePolicy3.setHeightForWidth(self.label_timedTest.sizePolicy().hasHeightForWidth())
         self.label_timedTest.setSizePolicy(sizePolicy3)
-        self.label_timedTest.setCursor(QCursor(Qt.PointingHandCursor))
+        self.label_timedTest.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.label_timedTest.setStyleSheet(u"font-size: 9px; background: transparent; padding: 1px 4px;")
         self.label_timedTest.setAlignment(Qt.AlignCenter)
 
@@ -103,7 +103,7 @@ class Ui_TypingOverlay(object):
         self.label_quoteTest.setObjectName(u"label_quoteTest")
         sizePolicy3.setHeightForWidth(self.label_quoteTest.sizePolicy().hasHeightForWidth())
         self.label_quoteTest.setSizePolicy(sizePolicy3)
-        self.label_quoteTest.setCursor(QCursor(Qt.PointingHandCursor))
+        self.label_quoteTest.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self.label_quoteTest.setStyleSheet(u"font-size: 9px; background: transparent; padding: 1px 4px;")
         self.label_quoteTest.setAlignment(Qt.AlignCenter)
 

@@ -145,6 +145,13 @@ main.py
   new pool and every random-pool switch announces a "record" at any speed. `_load_personal_bests`
   merges with `max` and `update_user` reloads only on an account change: it is called after every
   test, and a plain reload there races the queued write and drops the best just recorded.
+- **Personal-best alerts.** The flash is gated by `flash_personal_best` and the system
+  notification by `notify_personal_best`, both default `True` and both exposed in Settings →
+  Typing → Display Settings. The overlay never touches the tray icon itself: it emits
+  `personal_best` and `src/main.py` shows the message, because the tray icon lives in
+  `TippyTappyTypesApp`. The handler returns early when `isSystemTrayAvailable()` is false, which
+  is the case under `QT_QPA_PLATFORM=offscreen`. The results banner is not gated by either
+  setting.
 - **Database.** Four tables: `tests`, `character_stats`, `ngram_stats`, `personal_bests`, each
   keyed by `user_email` (NULL for local-only). Writes are queued and drained by one daemon thread;
   read queries open a short-lived connection. `close()` enqueues a sentinel and joins with a 5 s
@@ -457,6 +464,15 @@ As of 2026-11-23:
   behind (reproduced in 1 of 5 runs of the real app path). `_load_personal_bests` now merges by
   keeping the higher value per key, and `update_user` only reloads when the account actually
   changes. Verified 10/10 runs of the real `TippyTappyTypesApp` path.
+- **Unreleased work on 2026-11-23 (alerts):** `notify_personal_best` and `flash_personal_best`,
+  both default `True`, with two checkboxes in Settings → Typing → Display Settings. Verified
+  through the real `TippyTappyTypesApp` with `isSystemTrayAvailable` patched, since offscreen has
+  no tray: first test silent; a faster test shows the banner, flashes and emits one notification
+  reading `230.5 WPM at 100.0% accuracy, up from 90.3 WPM`; both off gives banner with no flash and
+  no notification; notification-only and flash-only each behave independently. Settings
+  round-trip verified across a reload. `QSystemTrayIcon.isSystemTrayAvailable()` and
+  `supportsMessages()` both return `True` on the real Windows platform. The settings group was
+  rendered and inspected: two new rows, both checked.
 - **Known gaps:** `src/auth.py` ships a placeholder worker URL
   (`https://TippyTappyTypes-oauth.YOUR-SUBDOMAIN.workers.dev`), so sign-in cannot succeed until a
   real worker is configured; `oauth_server/` is gitignored and undeployed from this repo.
