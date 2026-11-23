@@ -113,14 +113,19 @@ main.py
   background painted at `bg_opacity` (0–255), and a `ChildEventFilter` that forwards mouse, wheel
   and hover events from child labels so dragging and scrolling work anywhere in the window.
 - **Character window.** `CharacterWindow` is a second frameless `Qt.Tool` holding only the tinted
-  animation frame, sized to the frame so it has no padding. It is deliberately **not** a child of
-  the overlay: it must stay on screen while the overlay is hidden. `align_to()` puts its right edge
-  on the overlay's left edge, vertically centred, and `overlay_position()` is the inverse used when
-  the overlay is re-shown. `moveEvent` and `resizeEvent` on the overlay re-align it, so dragging or
-  resizing keeps the two touching. A click (press and release within 4 px) emits `clicked`, which
-  the overlay turns into `hide()` or `_show_aligned()`; a drag does not toggle. The tray menu's
-  "Toggle Typing Window" calls the public `toggle_visibility()` as a fallback for when the
-  character cannot be clicked, and recreates the overlay if it does not exist.
+  animation frame. Its width is fixed to the frame and its height is set to match the overlay in
+  `align_to()`, with the frame centred inside that height by `paintEvent`. It is deliberately
+  **not** a child of the overlay: it must stay on screen while the overlay is hidden. `align_to()`
+  puts its right edge on the overlay's left edge and its top on the overlay's top, and
+  `overlay_position()` is the inverse used when the overlay is re-shown. `moveEvent` and
+  `resizeEvent` on the overlay re-align it, so dragging or resizing keeps the two touching. A click
+  (press and release within 4 px) emits `clicked`, which the overlay turns into `hide()` or
+  `_show_aligned()`; a drag does not toggle. The tray menu's "Toggle Typing Window" calls the
+  public `toggle_visibility()` as a fallback for when the character cannot be clicked, and
+  recreates the overlay if it does not exist.
+- **The character is drawn once.** `label_status` in the overlay no longer receives a pixmap; it
+  carries only the transient status text and the quote author. Do not reintroduce the image there,
+  and do not hide the label outright or those two uses break.
 - **Modes.** `words` (10/25/50/100), `time` (15/30/60/120 s) and `quotes`
   (short/medium/long/extreme by character count). Mode, option index and active word pool persist
   across launches via `_persist_state()`. Left/Right cycle mode, Up/Down cycle the option, but only
@@ -485,14 +490,16 @@ As of 2026-11-23:
   `supportsMessages()` both return `True` on the real Windows platform. The settings group was
   rendered and inspected: two new rows, both checked.
 - **Unreleased work on 2026-11-23 (character window):** `src/character_window.py` holds only the
-  tinted animation frame and sits flush against the overlay's left edge, vertically centred. A
-  click toggles the overlay; a drag of 5 px or more does not. Verified through the real
-  `TippyTappyTypesApp` offscreen: `char.x + char.width == overlay.x` at startup, after a click
-  round-trip, after moving the overlay and after resizing it; vertical centring holds in each case;
-  the overlay hides while the character stays visible; the animation index advances on typed
-  characters and the character flips to active on the 500 ms status poll; a theme change re-tints
-  it. Both windows were rendered together and inspected. The character is still also drawn in the
-  overlay's details strip, which was left alone because removing it was not requested.
+  tinted animation frame and sits flush against the overlay's left edge at the same height and top.
+  A click toggles the overlay; a drag of 5 px or more does not. Verified through the real
+  `TippyTappyTypesApp` offscreen: `char.x + char.width == overlay.x`, `char.y == overlay.y` and
+  `char.height == overlay.height` at startup, after a click round-trip, after a tray toggle, after
+  moving the overlay and after resizing it; the overlay hides while the character stays visible;
+  the animation index advances on typed characters and `_set_status("Typing")` flips the character
+  to active; a theme change re-tints it; the status label's pixmap is null while the transient
+  status text and the quote credit still render. Both windows were rendered together and inspected.
+  The duplicate character in the details strip is gone, along with the overlay's `_tint_pixmap`,
+  idle-bob timer and `_show_status_image`.
 - **Unreleased work on 2026-11-23 (tray toggle):** "Toggle Typing Window" added to the tray menu
   between "Start Typing Test" and "Settings", calling the new public `toggle_visibility()`. Verified
   through the real `TippyTappyTypesApp` offscreen: the menu reads

@@ -76,7 +76,10 @@ class CharacterWindow(QWidget):
         self.setFocusPolicy(Qt.NoFocus)
         self.setCursor(Qt.PointingHandCursor)
         self.setToolTip("Click to show or hide the typing window")
-        self.setFixedSize(self._canvas_size())
+        # Width is fixed to the frame; the height is set to match the overlay
+        # in align_to(), so only a minimum is fixed here.
+        self.setFixedWidth(self._canvas_size().width())
+        self.setMinimumHeight(self._canvas_size().height())
 
     def _load_frames(self) -> None:
         """Load the same typing animation frames the overlay uses."""
@@ -138,7 +141,9 @@ class CharacterWindow(QWidget):
         if pixmap is None:
             return
         painter = QPainter(self)
-        painter.drawPixmap(0, 0, pixmap)
+        # The window is as tall as the overlay, so centre the frame in it.
+        y = (self.height() - pixmap.height()) // 2
+        painter.drawPixmap(0, max(0, y), pixmap)
 
     # ------------------------------------------------------------------
     # Animation
@@ -174,16 +179,20 @@ class CharacterWindow(QWidget):
     # ------------------------------------------------------------------
 
     def align_to(self, overlay_rect: QRect) -> None:
-        """Place this window immediately left of the overlay, vertically centered."""
+        """Match the overlay's height and sit immediately left of it.
+
+        The character window is the same height as the overlay so the two read
+        as one strip, and the frame is centred inside that height.
+        """
+        if overlay_rect.height() > 0 and self.height() != overlay_rect.height():
+            self.setFixedHeight(overlay_rect.height())
         x = overlay_rect.x() - self.width()
-        y = overlay_rect.y() + (overlay_rect.height() - self.height()) // 2
+        y = overlay_rect.y()
         self.move(x, y)
 
     def overlay_position(self, overlay_size: QSize) -> QPoint:
         """Top-left the overlay needs so it touches this window's right edge."""
-        x = self.x() + self.width()
-        y = self.y() - (overlay_size.height() - self.height()) // 2
-        return QPoint(x, y)
+        return QPoint(self.x() + self.width(), self.y())
 
     # ------------------------------------------------------------------
     # Input
