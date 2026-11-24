@@ -34,7 +34,7 @@ from src.config import Config
 # The character is drawn at this fraction of the window height, so it sits
 # inside the strip with a little breathing room instead of filling it edge to
 # edge. The window width follows the same fraction.
-CHARACTER_SCALE: float = 0.75
+CHARACTER_SCALE: float = 0.4
 
 
 class CharacterWindow(QWidget):
