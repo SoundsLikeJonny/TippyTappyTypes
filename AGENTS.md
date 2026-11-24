@@ -113,15 +113,20 @@ main.py
   background painted at `bg_opacity` (0–255), and a `ChildEventFilter` that forwards mouse, wheel
   and hover events from child labels so dragging and scrolling work anywhere in the window.
 - **Character window.** `CharacterWindow` is a second frameless `Qt.Tool` holding only the tinted
-  animation frame. Its width is fixed to the frame and its height is set to match the overlay in
-  `align_to()`, with the frame centred inside that height by `paintEvent`. It is deliberately
-  **not** a child of the overlay: it must stay on screen while the overlay is hidden. `align_to()`
-  puts its right edge on the overlay's left edge and its top on the overlay's top, and
-  `overlay_position()` is the inverse used when the overlay is re-shown. `moveEvent` and
-  `resizeEvent` on the overlay re-align it, so dragging or resizing keeps the two touching. A click
-  (press and release within 4 px) emits `clicked`, which the overlay turns into `hide()` or
-  `_show_aligned()`; a drag does not toggle. The tray menu's "Toggle Typing Window" calls the
-  public `toggle_visibility()` as a fallback for when the character cannot be clicked, and
+  animation frame. The PNGs are 16×16 with the character occupying only rows 2–14 and cols 3–13, so
+  `_compute_content_rect()` takes the union of the non-transparent bounds across all four frames and
+  `_render()` crops to it. Cropping first is what lets the character fill the window: scaling the
+  raw frame would leave it floating small inside a tall box. The union (not per-frame bounds) keeps
+  the animation from jittering. The window height is set to the overlay's height in `align_to()`,
+  the width follows the cropped aspect ratio via `_scaled_width()`, and `paintEvent` scales the
+  pixmap to the full height with `SmoothPixmapTransform`. The idle bob is a 1 px vertical nudge in
+  `paintEvent`, not a taller canvas. It is deliberately **not** a child of the overlay: it must stay
+  on screen while the overlay is hidden. `align_to()` puts its right edge on the overlay's left edge
+  and its top on the overlay's top, and `overlay_position()` is the inverse used when the overlay is
+  re-shown. `moveEvent` and `resizeEvent` on the overlay re-align it, so dragging or resizing keeps
+  the two touching. A click (press and release within 4 px) emits `clicked`, which the overlay turns
+  into `hide()` or `_show_aligned()`; a drag does not toggle. The tray menu's "Toggle Typing Window"
+  calls the public `toggle_visibility()` as a fallback for when the character cannot be clicked, and
   recreates the overlay if it does not exist.
 - **The character is drawn once.** `label_status` in the overlay no longer receives a pixmap; it
   carries only the transient status text and the quote author. Do not reintroduce the image there,
@@ -489,6 +494,14 @@ As of 2026-11-23:
   round-trip verified across a reload. `QSystemTrayIcon.isSystemTrayAvailable()` and
   `supportsMessages()` both return `True` on the real Windows platform. The settings group was
   rendered and inspected: two new rows, both checked.
+- **Unreleased work on 2026-11-24 (character scaling):** the character is cropped to its
+  non-transparent bounds and scaled to the window's full height, with the width following the
+  aspect ratio. Verified through the real `TippyTappyTypesApp` offscreen: at a 40 px overlay the
+  window is 34×40 and the drawn character spans rows 0–37 and cols 0–33; at a 100 px overlay the
+  window is 85×100 and the character spans rows 1–95. `char.height == overlay.height`,
+  `char.x + char.width == overlay.x` and `char.y == overlay.y` hold at startup, after a resize and
+  after a click round-trip. Both windows were rendered together and inspected: the character fills
+  the strip's height flush against the overlay.
 - **Unreleased work on 2026-11-23 (character window):** `src/character_window.py` holds only the
   tinted animation frame and sits flush against the overlay's left edge at the same height and top.
   A click toggles the overlay; a drag of 5 px or more does not. Verified through the real

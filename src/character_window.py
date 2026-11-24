@@ -94,13 +94,43 @@ class CharacterWindow(QWidget):
                 print(f"WARNING: character frame failed to load: {path}")
                 continue
             self._frames.append(pix)
+        self._content_rect = self._compute_content_rect()
+
+    def _compute_content_rect(self) -> QRect:
+        """Union of the non-transparent bounds across every frame.
+
+        The PNGs carry transparent padding, so scaling the raw frame would
+        leave the character smaller than the window. Cropping to this rect
+        first makes the character itself fill the window height, and using the
+        union across frames keeps the animation from jittering.
+        """
+        if not self._frames:
+            return QRect()
+        union: Optional[QRect] = None
+        for pix in self._frames:
+            img = pix.toImage()
+            w, h = img.width(), img.height()
+            rows = [y for y in range(h)
+                    if any(img.pixelColor(x, y).alpha() > 0 for x in range(w))]
+            cols = [x for x in range(w)
+                    if any(img.pixelColor(x, y).alpha() > 0 for y in range(h))]
+            if not rows or not cols:
+                continue
+            bounds = QRect(cols[0], rows[0],
+                           cols[-1] - cols[0] + 1, rows[-1] - rows[0] + 1)
+            union = bounds if union is None else union.united(bounds)
+        if union is None:
+            return self._frames[0].rect()
+        return union
 
     def _canvas_size(self) -> QSize:
-        """Frame size plus the 4px the idle bob needs below the character."""
-        if not self._frames:
-            return QSize(24, 24)
-        frame = self._frames[0]
-        return QSize(frame.width(), frame.height() + 4)
+        """Natural size of the cropped character."""
+        rect = getattr(self, "_content_rect", None)
+        if rect is None or rect.isEmpty():
+            if not self._frames:
+                return QSize(24, 24)
+            return self._frames[0].size()
+        return QSize(rect.width(), rect.height())
 
     # ------------------------------------------------------------------
     # Painting
@@ -124,26 +154,36 @@ class CharacterWindow(QWidget):
         color = self.config.get("typed_color", "#8b047e")
         if self._active:
             frame = self._frames[self._anim_index % len(self._frames)]
-            self._pixmap = self._tint_pixmap(frame, color)
         else:
             frame = self._frames[0]
-            offset = 2 if self._idle_phase else 0
-            canvas = QPixmap(frame.width(), frame.height() + 4)
-            canvas.fill(Qt.transparent)
-            p = QPainter(canvas)
-            p.drawPixmap(0, offset, frame)
-            p.end()
-            self._pixmap = self._tint_pixmap(canvas, color)
+        rect = getattr(self, "_content_rect", None)
+        if rect is not None and not rect.isEmpty():
+            frame = frame.copy(rect)
+        self._pixmap = self._tint_pixmap(frame, color)
         self.update()
 
     def paintEvent(self, event) -> None:
         pixmap = getattr(self, "_pixmap", None)
-        if pixmap is None:
+        if pixmap is None or pixmap.isNull():
             return
         painter = QPainter(self)
-        # The window is as tall as the overlay, so centre the frame in it.
-        y = (self.height() - pixmap.height()) // 2
-        painter.drawPixmap(0, max(0, y), pixmap)
+        painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
+        # Scale the character to the full window height, keeping its aspect
+        # ratio, and centre it horizontally. The window width is derived from
+        # the same ratio in align_to(), so the character fills it exactly.
+        target_h = self.height()
+        if target_h <= 0 or pixmap.height() <= 0:
+            return
+        # Idle bob: nudge the character down a pixel on alternate ticks.
+        y = 1 if (not self._active and self._idle_phase) else 0
+        draw_h = max(1, target_h - y)
+        target_w = max(1, round(pixmap.width() * draw_h / pixmap.height()))
+        x = (self.width() - target_w) // 2
+        painter.drawPixmap(
+            QRect(x, y, target_w, draw_h),
+            pixmap,
+            pixmap.rect(),
+        )
 
     # ------------------------------------------------------------------
     # Animation
@@ -181,14 +221,26 @@ class CharacterWindow(QWidget):
     def align_to(self, overlay_rect: QRect) -> None:
         """Match the overlay's height and sit immediately left of it.
 
-        The character window is the same height as the overlay so the two read
-        as one strip, and the frame is centred inside that height.
+        The character is scaled to the overlay's full height, so the window
+        width follows the frame's aspect ratio at that height.
         """
-        if overlay_rect.height() > 0 and self.height() != overlay_rect.height():
-            self.setFixedHeight(overlay_rect.height())
+        if overlay_rect.height() > 0:
+            target_h = overlay_rect.height()
+            if self.height() != target_h:
+                self.setFixedHeight(target_h)
+            target_w = self._scaled_width(target_h)
+            if self.width() != target_w:
+                self.setFixedWidth(target_w)
         x = overlay_rect.x() - self.width()
         y = overlay_rect.y()
         self.move(x, y)
+
+    def _scaled_width(self, height: int) -> int:
+        """Window width that keeps the character's aspect ratio at `height`."""
+        rect = getattr(self, "_content_rect", None)
+        if rect is None or rect.isEmpty() or height <= 0:
+            return self._canvas_size().width()
+        return max(1, round(rect.width() * height / rect.height()))
 
     def overlay_position(self, overlay_size: QSize) -> QPoint:
         """Top-left the overlay needs so it touches this window's right edge."""
