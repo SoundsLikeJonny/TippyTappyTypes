@@ -14,11 +14,11 @@ Entries are grouped under `### Added`, `### Changed`, `### Deprecated`, `### Rem
 
 - Companion character window: a second frameless always-on-top window holding only the tinted
   animation frame, placed immediately left of the typing overlay and matching its height so the two
-  touch with no gap and read as one strip. The character itself is scaled to that full height, with
-  the window width following its aspect ratio, so it fills the window rather than floating small
-  inside it. Clicking it hides the overlay; clicking again shows it, re-aligned to the character's
-  right edge. It follows the overlay when the overlay is dragged or resized, and it stays visible
-  while the overlay is hidden.
+  touch with no gap and read as one strip. The character itself is drawn at three quarters of that
+  height, centred, with the window width following its aspect ratio, so it sits inside the strip
+  with breathing room rather than filling it edge to edge. Clicking it hides the overlay; clicking
+  again shows it, re-aligned to the character's right edge. It follows the overlay when the overlay
+  is dragged or resized, and it stays visible while the overlay is hidden.
 - "Toggle Typing Window" in the tray menu, so the overlay can be shown or hidden when the character
   window cannot be clicked. It recreates the overlay if it does not exist.
 - System notification on a new personal best, on by default, shown through the tray icon with the

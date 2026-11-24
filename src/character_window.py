@@ -31,6 +31,11 @@ from PySide6.QtGui import QPainter, QPixmap, QColor
 from project_info import resource_path
 from src.config import Config
 
+# The character is drawn at this fraction of the window height, so it sits
+# inside the strip with a little breathing room instead of filling it edge to
+# edge. The window width follows the same fraction.
+CHARACTER_SCALE: float = 0.75
+
 
 class CharacterWindow(QWidget):
     """Frameless window that draws only the character animation.
@@ -168,17 +173,19 @@ class CharacterWindow(QWidget):
             return
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.SmoothPixmapTransform, True)
-        # Scale the character to the full window height, keeping its aspect
-        # ratio, and centre it horizontally. The window width is derived from
-        # the same ratio in align_to(), so the character fills it exactly.
-        target_h = self.height()
-        if target_h <= 0 or pixmap.height() <= 0:
+        # Draw the character at CHARACTER_SCALE of the window height, keeping
+        # its aspect ratio, centred horizontally and vertically. The window
+        # width is derived from the same scale in align_to(), so the character
+        # fills it exactly.
+        target_h = max(1, round(self.height() * CHARACTER_SCALE))
+        if pixmap.height() <= 0:
             return
         # Idle bob: nudge the character down a pixel on alternate ticks.
-        y = 1 if (not self._active and self._idle_phase) else 0
-        draw_h = max(1, target_h - y)
+        bob = 1 if (not self._active and self._idle_phase) else 0
+        draw_h = max(1, target_h - bob)
         target_w = max(1, round(pixmap.width() * draw_h / pixmap.height()))
         x = (self.width() - target_w) // 2
+        y = (self.height() - target_h) // 2 + bob
         painter.drawPixmap(
             QRect(x, y, target_w, draw_h),
             pixmap,
@@ -240,7 +247,8 @@ class CharacterWindow(QWidget):
         rect = getattr(self, "_content_rect", None)
         if rect is None or rect.isEmpty() or height <= 0:
             return self._canvas_size().width()
-        return max(1, round(rect.width() * height / rect.height()))
+        draw_h = max(1, round(height * CHARACTER_SCALE))
+        return max(1, round(rect.width() * draw_h / rect.height()))
 
     def overlay_position(self, overlay_size: QSize) -> QPoint:
         """Top-left the overlay needs so it touches this window's right edge."""
